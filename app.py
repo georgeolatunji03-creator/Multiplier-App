@@ -89,7 +89,7 @@ def save_settings(s):
         json.dump(s, f, indent=2)
 
 
-# ── INPUT HELPERS ──────────────────────────────────────────────────────────────
+# -- INPUT HELPERS -------------------------------------------------------------
 
 def parse_num(raw, fallback=0.0):
     cleaned = str(raw).replace(",", "").replace(" ", "").strip()
@@ -108,7 +108,7 @@ def ti(label, key, value):
     return parse_num(raw, fallback=0.0)
 
 
-# ── SCORING ────────────────────────────────────────────────────────────────────
+# -- SCORING -------------------------------------------------------------------
 
 def calc_pts(wn, cfg):
     effective_wn = min(wn, cfg["wn_cap"])
@@ -193,7 +193,7 @@ def calc_im_score(cfg, notional):
     return pts, "{:,}Mn - {:.2f}pts".format(int(notional), pts)
 
 
-# ── SESSION STATE ──────────────────────────────────────────────────────────────
+# -- SESSION STATE -------------------------------------------------------------
 
 def new_rfq_row():
     return {"package": "-- select --", "ccy": "", "exec_type": "Outright", "rr": 0.0, "notional": 0.0}
@@ -221,7 +221,7 @@ def init_state():
 init_state()
 cfg = st.session_state.settings
 
-# ── CSS ────────────────────────────────────────────────────────────────────────
+# -- CSS -----------------------------------------------------------------------
 
 st.markdown(
     """
@@ -311,9 +311,9 @@ st.markdown(
 
 tab_dash, tab_settings = st.tabs(["Dashboard", "Settings"])
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # DASHBOARD
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 with tab_dash:
     rfq_total = 0.0
@@ -323,7 +323,7 @@ with tab_dash:
     voice_total = 0.0
     im_total = 0.0
 
-    # ── RFQ ───────────────────────────────────────────────────────────────────
+    # -- RFQ -------------------------------------------------------------------
 
     st.markdown('<div class="sec-title">RFQ</div>', unsafe_allow_html=True)
 
@@ -331,7 +331,10 @@ with tab_dash:
     rows_to_delete = []
 
     for i, row in enumerate(st.session_state.rfq_rows):
-        st.markdown('<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1), unsafe_allow_html=True)
+        st.markdown(
+            '<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1),
+            unsafe_allow_html=True,
+        )
         c1, c2, c3, c4, c5 = st.columns([1.4, 1, 1, 1, 0.2])
 
         with c1:
@@ -429,7 +432,7 @@ with tab_dash:
 
     st.divider()
 
-    # ── HOUSE: PRODUCT ────────────────────────────────────────────────────────
+    # -- HOUSE: PRODUCT --------------------------------------------------------
 
     st.markdown('<div class="sec-title">HOUSE - Product</div>', unsafe_allow_html=True)
 
@@ -437,7 +440,10 @@ with tab_dash:
     efs_to_delete = []
 
     for i, row in enumerate(st.session_state.efs_rows):
-        st.markdown('<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1), unsafe_allow_html=True)
+        st.markdown(
+            '<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1),
+            unsafe_allow_html=True,
+        )
         c1, c2, c3, c4, c5 = st.columns([1.2, 1.1, 1, 1, 0.2])
 
         with c1:
@@ -500,7 +506,9 @@ with tab_dash:
                 efs_to_delete.append(i)
 
         if row["product"] in ("EFS Non STIR", "EFS STIR"):
-            pts, msg = calc_efs_score(cfg["efs"], row["product"], row.get("contract", ""), row["exec_type"], row["notional"])
+            pts, msg = calc_efs_score(
+                cfg["efs"], row["product"], row.get("contract", ""), row["exec_type"], row["notional"]
+            )
             efs_total += pts
         else:
             pts, msg = calc_product_score(cfg["product"], row["product"], row["notional"])
@@ -531,14 +539,17 @@ with tab_dash:
 
     st.divider()
 
-    # ── HOUSE: SERVICES ───────────────────────────────────────────────────────
+    # -- HOUSE: SERVICES -------------------------------------------------------
 
     st.markdown('<div class="sec-title">HOUSE - Services</div>', unsafe_allow_html=True)
 
     svc_to_delete = []
 
     for i, row in enumerate(st.session_state.svc_rows):
-        st.markdown('<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1), unsafe_allow_html=True)
+        st.markdown(
+            '<div class="row-box"><div class="row-num">Entry {}</div>'.format(i + 1),
+            unsafe_allow_html=True,
+        )
         svc_opts = ["-- select --", "Matching", "Voice", "Initial Margin"]
         c1, c2, c3, c4, c5 = st.columns([1.1, 1, 1, 1, 0.2])
 
@@ -584,7 +595,9 @@ with tab_dash:
             row["notional"] = ti("Weighted Notional (Mn)", "svc_not_{}".format(i), row["notional"])
 
             svc_cfg = cfg["matching"] if row["service"] == "Matching" else cfg["voice"]
-            pts, msg = calc_service_score(svc_cfg, row["venue"], row["exec_type"], row["ccy"], row["notional"])
+            pts, msg = calc_service_score(
+                svc_cfg, row["venue"], row["exec_type"], row["ccy"], row["notional"]
+            )
             pts = min(pts, svc_cfg["combined_max_pts"])
 
             if row["service"] == "Matching":
@@ -636,7 +649,7 @@ with tab_dash:
 
     st.divider()
 
-    # ── GRAND TOTAL ───────────────────────────────────────────────────────────
+    # -- GRAND TOTAL -----------------------------------------------------------
 
     grand_total = rfq_total + efs_total + product_total + match_capped + voice_capped + im_capped
 
@@ -664,11 +677,27 @@ with tab_dash:
         st.session_state.rfq_rows = [new_rfq_row()]
         st.session_state.efs_rows = [new_efs_row()]
         st.session_state.svc_rows = [new_svc_row()]
+        # Clear all text input state so fields show blank
+        keys_to_clear = [
+            k for k in st.session_state
+            if any(
+                k.startswith(p)
+                for p in [
+                    "rfq_not_", "efs_not_", "svc_not_", "rfq_rr_",
+                    "rfq_pkg_", "rfq_exec_", "rfq_maj_", "rfq_min_",
+                    "efs_prod_", "efs_contract_", "efs_exec_",
+                    "efs_maj_", "efs_min_", "svc_type_", "svc_venue_",
+                    "svc_exec_", "svc_ccy_",
+                ]
+            )
+        ]
+        for k in keys_to_clear:
+            del st.session_state[k]
         st.rerun()
 
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 # SETTINGS
-# ══════════════════════════════════════════════════════════════════════════════
+# ==============================================================================
 
 with tab_settings:
     st.markdown("### Framework Settings")
@@ -707,9 +736,10 @@ with tab_settings:
             with sc1:
                 d["wn_per_pt"] = ti("WN per 0.01pt", "s_rfq_{}_wn".format(key), d["wn_per_pt"])
             with sc2:
-                d["wn_cap"] = ti("WN Cap", "s_rfq_{}_cap".format(key), d["wn_cap"])
+                d["wn_cap"] = ti("WN Cap (Mn)", "s_rfq_{}_cap".format(key), d["wn_cap"])
             with sc3:
                 d["max_pts"] = ti("Max Points", "s_rfq_{}_max".format(key), d["max_pts"])
+
         st.markdown('<div class="sg-label">Combined Euribor + ESTR Cap</div>', unsafe_allow_html=True)
         s["rfq"]["euribor_estr_combined_max"] = ti(
             "Max Points - Euribor + ESTR combined",
@@ -725,7 +755,7 @@ with tab_settings:
             with sc1:
                 d["wn_per_pt"] = ti("WN per 0.01pt", "s_rfq_out_{}_wn".format(key), d["wn_per_pt"])
             with sc2:
-                d["wn_cap"] = ti("WN Cap", "s_rfq_out_{}_cap".format(key), d["wn_cap"])
+                d["wn_cap"] = ti("WN Cap (Mn)", "s_rfq_out_{}_cap".format(key), d["wn_cap"])
             with sc3:
                 d["max_pts"] = ti("Max Points", "s_rfq_out_{}_max".format(key), d["max_pts"])
 
@@ -737,7 +767,7 @@ with tab_settings:
             with sc1:
                 d["wn_per_pt"] = ti("WN per 0.01pt", "s_rfq_pkg_{}_wn".format(key), d["wn_per_pt"])
             with sc2:
-                d["wn_cap"] = ti("WN Cap", "s_rfq_pkg_{}_cap".format(key), d["wn_cap"])
+                d["wn_cap"] = ti("WN Cap (Mn)", "s_rfq_pkg_{}_cap".format(key), d["wn_cap"])
             with sc3:
                 d["max_pts"] = ti("Max Points", "s_rfq_pkg_{}_max".format(key), d["max_pts"])
 
@@ -754,11 +784,16 @@ with tab_settings:
             with sc1:
                 d["wn_per_pt"] = ti("WN per 0.01pt", "s_efs_{}_wn".format(key), d["wn_per_pt"])
             with sc2:
-                d["wn_cap"] = ti("WN Cap", "s_efs_{}_cap".format(key), d["wn_cap"])
+                d["wn_cap"] = ti("WN Cap (Mn)", "s_efs_{}_cap".format(key), d["wn_cap"])
             with sc3:
                 d["max_pts"] = ti("Max Points (per contract)", "s_efs_{}_max".format(key), d["max_pts"])
+
         st.markdown('<div class="sg-label">Combined EFS Cap</div>', unsafe_allow_html=True)
-        s["efs"]["combined_max_pts"] = ti("Max Points - all EFS combined", "s_efs_combined_max", s["efs"]["combined_max_pts"])
+        s["efs"]["combined_max_pts"] = ti(
+            "Max Points - all EFS combined",
+            "s_efs_combined_max",
+            s["efs"]["combined_max_pts"],
+        )
 
     with st.expander("Product - Scoring (Inflation / Majors / Minors / PLN)", expanded=False):
         if "product" not in s:
@@ -770,7 +805,7 @@ with tab_settings:
             with sc1:
                 d["wn_per_pt"] = ti("WN per 0.01pt", "s_prod_{}_wn".format(key), d["wn_per_pt"])
             with sc2:
-                d["wn_cap"] = ti("WN Cap", "s_prod_{}_cap".format(key), d["wn_cap"])
+                d["wn_cap"] = ti("WN Cap (Mn)", "s_prod_{}_cap".format(key), d["wn_cap"])
             with sc3:
                 d["max_pts"] = ti("Max Points", "s_prod_{}_max".format(key), d["max_pts"])
 
@@ -787,9 +822,10 @@ with tab_settings:
                 with sc1:
                     d["wn_per_pt"] = ti("WN per 0.01pt", "s_{}_{}_wn".format(svc_key, key), d["wn_per_pt"])
                 with sc2:
-                    d["wn_cap"] = ti("WN Cap", "s_{}_{}_cap".format(svc_key, key), d["wn_cap"])
+                    d["wn_cap"] = ti("WN Cap (Mn)", "s_{}_{}_cap".format(svc_key, key), d["wn_cap"])
                 with sc3:
                     d["max_pts"] = ti("Max Points (per currency)", "s_{}_{}_max".format(svc_key, key), d["max_pts"])
+
             st.markdown('<div class="sg-label">PLN and Combined Cap</div>', unsafe_allow_html=True)
             pc1, pc2 = st.columns(2)
             with pc1:
@@ -810,20 +846,18 @@ with tab_settings:
         with ic1:
             s["im"]["wn_per_pt"] = ti("WN per 0.01pt", "s_im_wn", s["im"]["wn_per_pt"])
         with ic2:
-            s["im"]["wn_floor"] = ti("Floor WN", "s_im_floor", s["im"]["wn_floor"])
+            s["im"]["wn_floor"] = ti("Floor WN (Mn)", "s_im_floor", s["im"]["wn_floor"])
         with ic3:
-            s["im"]["wn_cap"] = ti("Cap WN", "s_im_cap", s["im"]["wn_cap"])
+            s["im"]["wn_cap"] = ti("Cap WN (Mn)", "s_im_cap", s["im"]["wn_cap"])
         with ic4:
             s["im"]["max_pts"] = ti("Max Points", "s_im_max", s["im"]["max_pts"])
 
     st.divider()
     col_save, col_reset, _ = st.columns([1, 1, 4])
-
     with col_save:
         if st.button("Save Settings", type="primary", use_container_width=True):
             save_settings(s)
             st.success("Saved to settings.json")
-
     with col_reset:
         if st.button("Reset to Defaults", use_container_width=True):
             st.session_state.settings = DEFAULT_SETTINGS
