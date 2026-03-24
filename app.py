@@ -15,10 +15,10 @@ DEFAULT_SETTINGS = {
     "rfq": {
         "rr_min_euribor_estr": 60.0,
         "rr_min_other": 40.0,
-        "euribor_outright": {"pts_per_wn": 0.01, "wn_per_pt": 100, "wn_cap": 10000, "max_pts": 1.0},
-        "euribor_package": {"pts_per_wn": 0.01, "wn_per_pt": 600, "wn_cap": 60000, "max_pts": 1.0},
-        "estr_outright": {"pts_per_wn": 0.01, "wn_per_pt": 100, "wn_cap": 10000, "max_pts": 1.0},
-        "estr_package": {"pts_per_wn": 0.01, "wn_per_pt": 600, "wn_cap": 60000, "max_pts": 1.0},
+        "euribor_outright": {"pts_per_wn": 0.01, "wn_per_pt": 100, "wn_cap": 20000, "max_pts": 1.0},
+        "euribor_package": {"pts_per_wn": 0.01, "wn_per_pt": 600, "wn_cap": 120000, "max_pts": 1.0},
+        "estr_outright": {"pts_per_wn": 0.01, "wn_per_pt": 100, "wn_cap": 20000, "max_pts": 1.0},
+        "estr_package": {"pts_per_wn": 0.01, "wn_per_pt": 600, "wn_cap": 120000, "max_pts": 1.0},
         "euribor_estr_combined_max": 2.0,
         "outright": {
             "inflation": {"pts_per_wn": 0.01, "wn_per_pt": 5, "wn_cap": 200, "max_pts": 0.4},
